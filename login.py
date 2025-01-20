@@ -25,8 +25,7 @@ class LoginPage(QWidget):
         image_label.setStyleSheet(
             """
             QLabel {
-                border: 2px solid lightblue; /* Light blue border */
-                margin-right: 40px;          /* Spacing between image and form */
+                margin-right: 40px;          
             }
             """
         )
