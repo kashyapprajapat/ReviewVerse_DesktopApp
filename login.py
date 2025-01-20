@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPixmap
 import requests
-import utils  # Ensure you have this module, or replace with your desired implementation
+import utils  # Ensure you have this module or replace with your desired implementation
 
 class LoginPage(QWidget):
     switch_to_register = pyqtSignal()
@@ -13,7 +13,7 @@ class LoginPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login")
-        self.setGeometry(400, 300, 2050, 900)  # Adjusted window size for better usability
+        self.setGeometry(400, 300, 1050, 600)  # Adjusted window size
 
         # Main Horizontal Layout
         main_layout = QHBoxLayout()
@@ -81,7 +81,7 @@ class LoginPage(QWidget):
             """
         )
         password_label = QLabel("Password:", self)
-        password_label.setStyleSheet("font-weight: bold;font-size: 17px;margin-top: 10px; ")  # Bold label
+        password_label.setStyleSheet("font-weight: bold; font-size: 17px; margin-top: 10px;")  # Bold label
         form_layout.addWidget(password_label)
         form_layout.addWidget(self.password_input)
 
@@ -116,13 +116,12 @@ class LoginPage(QWidget):
         register_label.setToolTip("Click to create a new account with ReviewVerse.")
         register_label.setStyleSheet(
             """
-            QLabel{
-             margin-top: 30px;
+            QLabel {
+                margin-top: 30px;
             }
-            QLabel#a{
+            QLabel a {
                 color: blue; 
                 text-decoration: underline; 
-                margin-top: 40px;
                 font-size: 14px;
             }
             """
@@ -143,23 +142,29 @@ class LoginPage(QWidget):
         """
         email = self.email_input.text()
         password = self.password_input.text()
-        
+
         if not email or not password:
             QMessageBox.warning(self, "Error", "Please enter both email and password.")
             return
 
         response = self.send_login_request(email, password)
-        print(f"=============>>>>>>>{response}")
-        if response.status_code == 200:
+
+        if response and response.status_code == 200:
             try:
                 data = response.json()
-                utils.set_user_details(data["username"], data["user_id"])  
-                QMessageBox.information(self, "Success", "Login successful! Welcome back!")
-                self.switch_to_mainboard.emit()
+                if "user" in data:
+                    user = data["user"]
+                    utils.set_user_details(user.get("username", ""), user.get("id", ""))
+                    QMessageBox.information(self, "Success", "Login successful! Welcome back!")
+                    self.switch_to_mainboard.emit()
+                else:
+                    QMessageBox.warning(self, "Error", "Unexpected response format.")
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Unexpected response: {e}")
+                QMessageBox.critical(self, "Error", f"Failed to parse response: {e}")
+        elif response:
+            QMessageBox.warning(self, "Error", f"Login failed: {response.json().get('detail', 'Unknown error')}")
         else:
-            QMessageBox.warning(self, "Error", "Login failed. Please check your credentials.")
+            QMessageBox.critical(self, "Error", "No response from server.")
 
     @staticmethod
     def send_login_request(email, password):
@@ -168,7 +173,9 @@ class LoginPage(QWidget):
         """
         try:
             url = "https://reviewverse.onrender.com/login"  # Replace with your API endpoint
-            response = requests.post(url, json={"email": email, "password": password})
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            payload = {"email": email, "password": password}
+            response = requests.post(url, data=payload, headers=headers)
             return response
         except requests.exceptions.RequestException as e:
             QMessageBox.critical(None, "Error", f"Failed to connect to server: {e}")
