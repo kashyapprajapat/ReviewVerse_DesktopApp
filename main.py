@@ -41,9 +41,47 @@
 
 
 
+# from PyQt5.QtWidgets import QApplication, QStackedWidget
+# import sys
+# from mainboard import MainBoardPage
+
+# class MainApp(QStackedWidget):
+#     def __init__(self):
+#         super().__init__()
+
+#         # Debug statement
+#         print("Initializing MainApp")
+
+#         # Directly create and add the mainboard page
+#         self.mainboard_page = MainBoardPage()
+#         self.addWidget(self.mainboard_page)
+
+#         # Set the window title with logo/emoji
+#         self.setWindowTitle("ReviewVerse 📚")  # You can adjust the emoji to your desired one
+
+#         # Show the mainboard page directly
+#         self.setCurrentWidget(self.mainboard_page)
+
+#         # Debug statement
+#         print("MainApp initialized successfully")
+
+# if __name__ == "__main__":
+#     # Debug statement
+#     print("Starting application")
+
+#     app = QApplication(sys.argv)
+#     main_app = MainApp()
+#     main_app.show()
+
+#     # Debug statement
+#     print("Application running")
+
+#     sys.exit(app.exec_())
+
+
 from PyQt5.QtWidgets import QApplication, QStackedWidget
 import sys
-from mainboard import MainBoardPage
+from userdashboard import UserDashboard  # Import the UserDashboard class
 
 class MainApp(QStackedWidget):
     def __init__(self):
@@ -52,15 +90,15 @@ class MainApp(QStackedWidget):
         # Debug statement
         print("Initializing MainApp")
 
-        # Directly create and add the mainboard page
-        self.mainboard_page = MainBoardPage()
-        self.addWidget(self.mainboard_page)
+        # Directly create and add the user dashboard page
+        self.user_dashboard = UserDashboard()
+        self.addWidget(self.user_dashboard)
 
         # Set the window title with logo/emoji
         self.setWindowTitle("ReviewVerse 📚")  # You can adjust the emoji to your desired one
 
-        # Show the mainboard page directly
-        self.setCurrentWidget(self.mainboard_page)
+        # Show the user dashboard directly
+        self.setCurrentWidget(self.user_dashboard)
 
         # Debug statement
         print("MainApp initialized successfully")
@@ -77,4 +115,6 @@ if __name__ == "__main__":
     print("Application running")
 
     sys.exit(app.exec_())
+
+
 
