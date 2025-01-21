@@ -13,7 +13,8 @@ class LoginPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login")
-        self.setGeometry(400, 300, 1050, 600)  # Adjusted window size
+        self.setGeometry(800, 700, 5050, 1200)  # Adjusted window size
+
 
         # Main Horizontal Layout
         main_layout = QHBoxLayout()
@@ -36,7 +37,7 @@ class LoginPage(QWidget):
 
         # Title
         title_label = QLabel("Login to ReviewVerse 📚", self)
-        title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
+        title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;margin-top:150px")
         form_layout.addWidget(title_label)
 
         # Email Input
@@ -163,7 +164,7 @@ class LoginPage(QWidget):
         elif response:
             QMessageBox.warning(self, "Error", f"Login failed: {response.json().get('detail', 'Unknown error')}")
         else:
-            QMessageBox.critical(self, "Error", "No response from server.")
+            QMessageBox.critical(self, "Error", "Reviewverse not found Please Register yourself.")
 
     @staticmethod
     def send_login_request(email, password):

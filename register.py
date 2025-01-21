@@ -13,25 +13,12 @@ class RegisterPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Register")
-        self.setGeometry(400, 300, 1050, 600)  
+        self.setGeometry(600, 500, 2050, 1500)  
 
         # Main Horizontal Layout
         main_layout = QHBoxLayout()
 
-        # Left side: Image
-        image_label = QLabel(self)
-        pixmap = QPixmap("registartion.jpg")  # Ensure this image exists
-        image_label.setPixmap(pixmap.scaled(400, 400))  # Resize image to fit
-        image_label.setStyleSheet(
-            """
-            QLabel {
-                margin-right: 40px;          /* Spacing between image and form */
-            }
-            """
-        )
-        main_layout.addWidget(image_label)
-
-        # Right side: Form Layout
+        # Left side: Form Layout
         form_layout = QVBoxLayout()
 
         # Title
@@ -129,7 +116,6 @@ class RegisterPage(QWidget):
 
         # Add the horizontal layout to the form layout
         form_layout.addLayout(gender_layout)
-
 
         # Age Input (Required)
         self.age_input = QLineEdit(self)
@@ -249,7 +235,21 @@ class RegisterPage(QWidget):
         form_layout.addWidget(self.login_link)
 
         form_layout.addStretch()  # Add stretch for alignment
+
+        # Right side: Image
+        image_label = QLabel(self)
+        pixmap = QPixmap("registration.png")  # Ensure this image exists
+        image_label.setPixmap(pixmap.scaled(400, 300))  # Resize image to fit
+        image_label.setStyleSheet(
+            """
+            QLabel {
+                margin-left: 40px;          /* Spacing between image and form */
+            }
+            """
+        )
+
         main_layout.addLayout(form_layout)
+        main_layout.addWidget(image_label)
 
         # Set Main Layout
         self.setLayout(main_layout)
@@ -267,6 +267,7 @@ class RegisterPage(QWidget):
             else:
                 self.profile_photo_label.setText(file_path)  # Store full file path
                 self.profile_photo_label.setStyleSheet("font-style: normal; color: black;")
+                self.profile_photo_path = file_path  # Store file path for later use
 
     def handle_register(self):
         """
@@ -292,23 +293,33 @@ class RegisterPage(QWidget):
             QMessageBox.warning(self, "Invalid Age", "Age must be a number greater than or equal to 18.")
             return
 
+        if not hasattr(self, 'profile_photo_path') or not self.profile_photo_path:
+            QMessageBox.warning(self, "Profile Photo", "Please upload a profile photo.")
+            return
+
         # Simulate registration (send to backend)
         try:
-            response = requests.post(
-                "https://example.com/register",
-                data={"username": username, "email": email, "password": password, "gender": gender, "age": age, "role": role}
-            )
-            response.raise_for_status()
-            QMessageBox.information(self, "Success", "You have successfully registered!")
-        except requests.exceptions.RequestException:
-            QMessageBox.warning(self, "Error", "Failed to register. Please try again.")
-
+            response = self.send_register_request(username, email, password, gender, age, role, self.profile_photo_path)
+            if response.status_code == 200 or response.json().get("message") == "User registered successfully":
+                QMessageBox.information(self, "Success", "You have successfully registered!")
+                self.switch_to_login.emit()
+            else:
+                QMessageBox.warning(self, "Error", "Failed to register. Please try again later.")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to register. {str(e)}")
 
     @staticmethod
     def send_register_request(username, email, password, gender, age, current_role, profile_photo_path):
         """
         Sends a POST request to the register endpoint with multipart/form-data.
         """
+        if gender == 1:
+          gender = "male"
+        elif gender == 2:
+          gender = "female"
+        else:
+          gender = "other" 
+
         url = "https://reviewverse.onrender.com/register"
         headers = {
             "accept": "application/json"
@@ -324,4 +335,5 @@ class RegisterPage(QWidget):
         }
 
         response = requests.post(url, headers=headers, files=files)
+        print(response)
         return response
