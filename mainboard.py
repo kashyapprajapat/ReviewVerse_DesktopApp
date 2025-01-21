@@ -2,14 +2,17 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QHBoxLayout, QFrame, QLineEdit, QPushButton, QMessageBox, QScrollArea, QComboBox, QCheckBox, QTextEdit
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QCursor
 import requests
+from userdashboard import UserDashboard  # Import the UserDashboard class
+from utils import set_user_details  # Import the set_user_details function
 
 
 class MainBoardPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Main Board")
-        self.setGeometry(800, 700, 5050, 1200)
+        self.setGeometry(800, 700, 8000, 2000)
 
         # Pagination variables
         self.current_page = 1
@@ -41,14 +44,28 @@ class MainBoardPage(QWidget):
         """)
         navbar.addWidget(self.navbar_title)
 
-        # Add a stretch to push the circle to the right
+        # Add a stretch to push the link to the right
         navbar.addStretch()
 
-        # Add a circle with black color on the right side
-        circle = QFrame(self)
-        circle.setFixedSize(20, 20)  # Fixed size for the circle
-        circle.setStyleSheet("background-color: black; border-radius: 10px;")  # Circle styling
-        navbar.addWidget(circle)
+        # Add "My Dashboard" link
+        self.dashboard_link = QLabel("My Dashboard", self)
+        self.dashboard_link.setAlignment(Qt.AlignRight)
+        self.dashboard_link.setStyleSheet("""
+            QLabel {
+                font-family: 'Arial', sans-serif;
+                font-size: 16px;
+                font-weight: 500;
+                color: #008ce3;
+                text-decoration: underline;
+            }
+            QLabel:hover {
+                color: #0077c2;
+                cursor: pointer;
+            }
+        """)
+        self.dashboard_link.setCursor(QCursor(Qt.PointingHandCursor))  # Change cursor to hand
+        self.dashboard_link.mousePressEvent = self.open_dashboard  # Connect click event
+        navbar.addWidget(self.dashboard_link)
 
         # Add navbar to the main layout
         self.layout.addLayout(navbar)
@@ -447,7 +464,6 @@ class MainBoardPage(QWidget):
             card = QFrame(self)
             card.setStyleSheet("""
                 QFrame {
-                               
                     background-color: #f9f9f9;
                     border: 1px solid;
                     border-radius: 10px;
@@ -522,10 +538,32 @@ class MainBoardPage(QWidget):
         # Add stretch to push cards to the top
         self.scroll_layout.addStretch()
 
-     ##############   Book IMage displayed .
+    def open_dashboard(self, event):
+        """
+        Opens the UserDashboard when the "My Dashboard" link is clicked.
+        """
+        # Import the global variables from utils
+        from utils import username, user_id
 
+        # Check if user details are set 
+        if username is None or user_id is None:
+          QMessageBox.warning(self, "Error", "User details are not set. Please log in first.")
+        return
 
-
+        # Open the UserDashboard
+        self.dashboard = UserDashboard()
+        self.dashboard.show()   
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ##############   Book IMage displayed .
 
 
     # def load_photo(self, photo_url, photo_label):
