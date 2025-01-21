@@ -41,7 +41,6 @@
 
 
 
-
 from PyQt5.QtWidgets import QApplication, QStackedWidget
 import sys
 from mainboard import MainBoardPage
@@ -49,6 +48,9 @@ from mainboard import MainBoardPage
 class MainApp(QStackedWidget):
     def __init__(self):
         super().__init__()
+
+        # Debug statement
+        print("Initializing MainApp")
 
         # Directly create and add the mainboard page
         self.mainboard_page = MainBoardPage()
@@ -60,9 +62,19 @@ class MainApp(QStackedWidget):
         # Show the mainboard page directly
         self.setCurrentWidget(self.mainboard_page)
 
+        # Debug statement
+        print("MainApp initialized successfully")
+
 if __name__ == "__main__":
+    # Debug statement
+    print("Starting application")
+
     app = QApplication(sys.argv)
     main_app = MainApp()
     main_app.show()
+
+    # Debug statement
+    print("Application running")
+
     sys.exit(app.exec_())
 

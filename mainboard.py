@@ -1,9 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QFrame, QLineEdit, QPushButton, QMessageBox, QScrollArea, QComboBox, QCheckBox
+    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QFrame, QLineEdit, QPushButton, QMessageBox, QScrollArea, QComboBox, QCheckBox, QTextEdit
 )
-from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from PyQt5.QtCore import Qt
 import requests
 
 
@@ -13,70 +11,12 @@ class MainBoardPage(QWidget):
         self.setWindowTitle("Main Board")
         self.setGeometry(800, 700, 5050, 1200)
 
+        # Pagination variables
+        self.current_page = 1
+        self.limit = 10  # Number of reviews per page
+
         # Create main layout
-        self.layout = QHBoxLayout()  # Use QHBoxLayout for left and right sections
-
-        # Left side layout for filters
-        left_layout = QVBoxLayout()
-
-        # Add filter options to the left side
-        filter_label = QLabel("Filters", self)
-        filter_label.setStyleSheet("font-size: 20px; font-weight: bold; margin-top: 100px;")
-        left_layout.addWidget(filter_label)
-
-        # Add Reading Status dropdown
-        self.reading_status_dropdown = QComboBox(self)
-        self.reading_status_dropdown.addItems(["All", "start", "continue", "finished"])
-        self.reading_status_dropdown.setPlaceholderText("Reading Status")
-        left_layout.addWidget(self.reading_status_dropdown)
-
-        # Add Rating dropdown
-        self.rating_dropdown = QComboBox(self)
-        self.rating_dropdown.addItems(["All", "1", "2", "3", "4", "5"])
-        self.rating_dropdown.setPlaceholderText("Rating")
-        left_layout.addWidget(self.rating_dropdown)
-
-        # Add Buy Place dropdown
-        self.buyplace_dropdown = QComboBox(self)
-        self.buyplace_dropdown.addItems(["All", "online", "offline"])
-        self.buyplace_dropdown.setPlaceholderText("Buy Place")
-        left_layout.addWidget(self.buyplace_dropdown)
-
-        # Add Satisfaction checkbox
-        self.satisfied_checkbox = QCheckBox("Satisfied", self)
-        left_layout.addWidget(self.satisfied_checkbox)
-
-        # Add Apply button
-        self.apply_button = QPushButton("Apply", self)
-        self.apply_button.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50; /* Light green */
-                color: white; 
-                padding: 10px 20px; 
-                border: none; 
-                border-radius: 15px; /* Rounded corners */
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049; /* Slightly darker green */
-                font-weight: bold; /* Bold white text */
-            }
-            QPushButton:pressed {
-                background-color: #3e8e41; /* Even darker green */
-                font-weight: bold; /* Bold white text */
-            }
-        """)
-        self.apply_button.clicked.connect(self.handle_apply)
-        left_layout.addWidget(self.apply_button)
-
-        # Add stretch to push filters to the top
-        left_layout.addStretch()
-
-        # Add left layout to the main layout
-        self.layout.addLayout(left_layout)
-
-        # Right side layout for search bar, search button, and cards
-        right_layout = QVBoxLayout()
+        self.layout = QVBoxLayout()  # Use QVBoxLayout for top (navbar/search) and bottom (left/right) sections
 
         # Create a horizontal layout for the navbar
         navbar = QHBoxLayout()
@@ -110,8 +50,8 @@ class MainBoardPage(QWidget):
         circle.setStyleSheet("background-color: black; border-radius: 10px;")  # Circle styling
         navbar.addWidget(circle)
 
-        # Add navbar to the right layout
-        right_layout.addLayout(navbar)
+        # Add navbar to the main layout
+        self.layout.addLayout(navbar)
 
         # Create a horizontal layout for the search bar and button
         search_layout = QHBoxLayout()
@@ -155,8 +95,135 @@ class MainBoardPage(QWidget):
         self.search_button.clicked.connect(self.handle_search)
         search_layout.addWidget(self.search_button)
 
-        # Add search layout to the right layout
-        right_layout.addLayout(search_layout)
+        # Add search layout to the main layout
+        self.layout.addLayout(search_layout)
+
+        # Create a horizontal layout for the left and right sections
+        content_layout = QHBoxLayout()
+
+        # Left side layout for filters
+        left_layout = QVBoxLayout()
+
+        # Add filter options to the left side
+        filter_label = QLabel("Filters", self)
+        filter_label.setStyleSheet("""
+            QLabel {
+                font-size: 20px; 
+                font-weight: bold; 
+                margin-top: 50px;
+                margin-bottom: 20px;
+                color: #008ce3;  /* Updated color */
+            }
+        """)
+        left_layout.addWidget(filter_label)
+
+        # Add Reading Status dropdown
+        self.reading_status_dropdown = QComboBox(self)
+        self.reading_status_dropdown.addItems(["All", "start", "continue", "finished"])
+        self.reading_status_dropdown.setPlaceholderText("Reading Status")
+        self.reading_status_dropdown.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 2px solid #008ce3;  /* Updated color */
+                border-radius: 10px;
+                font-size: 14px;
+                margin-bottom: 15px;  /* Add margin below */
+            }
+            QComboBox:hover {
+                border-color: #0077c2;  /* Darker shade on hover */
+            }
+        """)
+        left_layout.addWidget(self.reading_status_dropdown)
+
+        # Add Rating dropdown
+        self.rating_dropdown = QComboBox(self)
+        self.rating_dropdown.addItems(["All", "1", "2", "3", "4", "5"])
+        self.rating_dropdown.setPlaceholderText("Rating")
+        self.rating_dropdown.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 2px solid #008ce3;  /* Updated color */
+                border-radius: 10px;
+                font-size: 14px;
+                margin-bottom: 15px;  /* Add margin below */
+            }
+            QComboBox:hover {
+                border-color: #0077c2;  /* Darker shade on hover */
+            }
+        """)
+        left_layout.addWidget(self.rating_dropdown)
+
+        # Add Buy Place dropdown
+        self.buyplace_dropdown = QComboBox(self)
+        self.buyplace_dropdown.addItems(["All", "online", "offline"])
+        self.buyplace_dropdown.setPlaceholderText("Buy Place")
+        self.buyplace_dropdown.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 2px solid #008ce3;  /* Updated color */
+                border-radius: 10px;
+                font-size: 14px;
+                margin-bottom: 15px;  /* Add margin below */
+            }
+            QComboBox:hover {
+                border-color: #0077c2;  /* Darker shade on hover */
+            }
+        """)
+        left_layout.addWidget(self.buyplace_dropdown)
+
+        # Add Satisfaction checkbox
+        self.satisfied_checkbox = QCheckBox("Satisfied", self)
+        self.satisfied_checkbox.setStyleSheet("""
+            QCheckBox {
+                padding: 8px;
+                font-size: 14px;
+                color: #008ce3;  /* Updated color */
+                margin-bottom: 15px;  /* Add margin below */
+            }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+                border: 2px solid #008ce3;  /* Updated color */
+                border-radius: 4px;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #008ce3;  /* Updated color */
+            }
+        """)
+        left_layout.addWidget(self.satisfied_checkbox)
+
+        # Add Apply button
+        self.apply_button = QPushButton("Apply", self)
+        self.apply_button.setStyleSheet("""
+            QPushButton {
+                background-color: #008ce3; /* Updated color */
+                color: white; 
+                padding: 10px 20px; 
+                border: none; 
+                border-radius: 15px; /* Rounded corners */
+                font-size: 14px;
+                margin-bottom: 15px;  /* Add margin below */
+            }
+            QPushButton:hover {
+                background-color: #0077c2; /* Darker shade on hover */
+                font-weight: bold; /* Bold white text */
+            }
+            QPushButton:pressed {
+                background-color: #0066b3; /* Even darker shade */
+                font-weight: bold; /* Bold white text */
+            }
+        """)
+        self.apply_button.clicked.connect(self.handle_apply)
+        left_layout.addWidget(self.apply_button)
+
+        # Add stretch to push filters to the top
+        left_layout.addStretch()
+
+        # Add left layout to the content layout
+        content_layout.addLayout(left_layout)
+
+        # Right side layout for cards
+        right_layout = QVBoxLayout()
 
         # Create a scroll area to display the cards
         self.scroll_area = QScrollArea(self)
@@ -168,11 +235,106 @@ class MainBoardPage(QWidget):
         # Add scroll area to the right layout
         right_layout.addWidget(self.scroll_area)
 
-        # Add right layout to the main layout
-        self.layout.addLayout(right_layout)
+        # Add pagination controls
+        pagination_layout = QHBoxLayout()
+        self.previous_button = QPushButton("Previous", self)
+        self.previous_button.setStyleSheet("""
+            QPushButton {
+                background-color: #008ce3;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 15px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #0077c2;
+                font-weight: bold;
+            }
+            QPushButton:pressed {
+                background-color: #0066b3;
+                font-weight: bold;
+            }
+        """)
+        self.previous_button.clicked.connect(self.handle_previous)
+        pagination_layout.addWidget(self.previous_button)
+
+        self.page_label = QLabel(f"Page {self.current_page}", self)
+        self.page_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        pagination_layout.addWidget(self.page_label)
+
+        self.next_button = QPushButton("Next", self)
+        self.next_button.setStyleSheet("""
+            QPushButton {
+                background-color: #008ce3;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 15px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #0077c2;
+                font-weight: bold;
+            }
+            QPushButton:pressed {
+                background-color: #0066b3;
+                font-weight: bold;
+            }
+        """)
+        self.next_button.clicked.connect(self.handle_next)
+        pagination_layout.addWidget(self.next_button)
+
+        right_layout.addLayout(pagination_layout)
+
+        # Add right layout to the content layout
+        content_layout.addLayout(right_layout)
+
+        # Add content layout to the main layout
+        self.layout.addLayout(content_layout)
 
         # Set the layout for the page
         self.setLayout(self.layout)
+
+        # Load initial reviews
+        self.load_reviews()
+
+    def load_reviews(self):
+        """
+        Loads reviews for the current page.
+        """
+        url = "https://reviewverse.onrender.com/get-reviews"
+        params = {
+            "page": self.current_page,
+            "limit": self.limit
+        }
+
+        try:
+            response = requests.get(url, params=params, headers={"accept": "application/json"})
+            if response.status_code == 200:
+                data = response.json()
+                self.display_reviews(data)
+            else:
+                QMessageBox.warning(self, "API Error", f"Failed to fetch data. Status code: {response.status_code}")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"An error occurred: {str(e)}")
+
+    def handle_previous(self):
+        """
+        Handles the Previous button click event.
+        """
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.page_label.setText(f"Page {self.current_page}")
+            self.load_reviews()
+
+    def handle_next(self):
+        """
+        Handles the Next button click event.
+        """
+        self.current_page += 1
+        self.page_label.setText(f"Page {self.current_page}")
+        self.load_reviews()
 
     def handle_search(self):
         """
@@ -200,8 +362,8 @@ class MainBoardPage(QWidget):
 
         # Prepare API parameters
         params = {
-            "page": 1,
-            "page_size": 10
+            "page": self.current_page,
+            "limit": self.limit
         }
 
         # Add filters to parameters if not "All"
@@ -212,7 +374,7 @@ class MainBoardPage(QWidget):
         if buyplace != "All":
             params["buyplace"] = buyplace
         if satisfied:
-            params["satisfied"] = True
+            params["satisfied"] = str(satisfied).lower()  # Convert to lowercase string
 
         # Call the API with filters
         self.call_api_with_filters(params)
@@ -223,8 +385,8 @@ class MainBoardPage(QWidget):
         """
         url = "https://reviewverse.onrender.com/filter"
         params = {
-            "page": 1,
-            "page_size": 10
+            "page": self.current_page,
+            "limit": self.limit
         }
 
         # Add bookname or bookauthor based on input
@@ -268,7 +430,7 @@ class MainBoardPage(QWidget):
 
     def display_reviews(self, data):
         """
-        Displays the reviews in a card format matching the design in the image.
+        Displays the reviews in a card format.
         """
         # Clear previous results
         for i in reversed(range(self.scroll_layout.count())):
@@ -281,63 +443,78 @@ class MainBoardPage(QWidget):
 
         # Display each review in a card
         for review in data["reviews"]:
+            # Create the main card frame
             card = QFrame(self)
             card.setStyleSheet("""
                 QFrame {
+                               
                     background-color: #f9f9f9;
-                    border: 1px solid #ddd;
+                    border: 1px solid;
                     border-radius: 10px;
                     padding: 15px;
                     margin: 10px;
                 }
-                QLabel {
-                    font-size: 14px;
-                    color: #333;
-                }
             """)
-            card_layout = QVBoxLayout(card)
+            card_layout = QHBoxLayout(card)  # Use QHBoxLayout for left (photo) and right (content) sections
 
-            # Book Photo (Load from URL)
-            photo_label = QLabel(self)
-            photo_label.setFixedSize(100, 150)  # Set a fixed size for the photo
-            photo_label.setStyleSheet("""
-                QLabel {
-                    background-color: #ccc;
-                    border: 1px solid #999;
+            # Right side: Content
+            content_layout = QVBoxLayout()
+
+            # First row: Book Name (left) and Rating (right)
+            first_row = QHBoxLayout()
+            bookname_label = QLabel(f"<b>📖 {review['bookname']}</b>", self)
+            bookname_label.setStyleSheet("font-size: 16px;")
+            first_row.addWidget(bookname_label)
+
+            rating_label = QLabel(f"<b>⭐ {review['rating']}/5</b>", self)
+            rating_label.setStyleSheet("font-size: 16px;")
+            first_row.addStretch()  # Push rating to the right
+            first_row.addWidget(rating_label)
+            content_layout.addLayout(first_row)
+
+            # Second row: Author (left) and Satisfied (right)
+            second_row = QHBoxLayout()
+            author_label = QLabel(f"<b>✍🏻 {review['bookauthor']}</b>", self)
+            author_label.setStyleSheet("font-size: 14px;")
+            second_row.addWidget(author_label)
+
+            satisfied_label = QLabel(f"<b>👌🏻 {'Satisfied' if review['satisfied'] else 'Not Satisfied'}</b>", self)
+            satisfied_label.setStyleSheet("font-size: 14px;")
+            second_row.addStretch()  # Push satisfied to the right
+            second_row.addWidget(satisfied_label)
+            content_layout.addLayout(second_row)
+
+            # Third row: Experience (textarea-like)
+            experience_label = QLabel("<b>Experience:</b>", self)
+            content_layout.addWidget(experience_label)
+
+            experience_text = QTextEdit(self)
+            experience_text.setText(review["experience"])
+            experience_text.setReadOnly(True)  # Make it read-only
+            experience_text.setFixedHeight(80)  # Set a fixed height for the text area
+            experience_text.setStyleSheet("""
+                QTextEdit {
+                    border: 2px solid #999;  /* Border for the experience section */
                     border-radius: 5px;
+                    padding: 5px;
                 }
             """)
-            if review.get("bookphoto"):  # Load the book photo if URL is available
-                self.load_photo(review["bookphoto"], photo_label)
-            card_layout.addWidget(photo_label)
+            content_layout.addWidget(experience_text)
 
-            # Book Name
-            bookname_label = QLabel(f"<b>Book Name:</b> {review['bookname']}", self)
-            card_layout.addWidget(bookname_label)
+            # Fourth row: Reading Status (left) and Buy Place (right)
+            fourth_row = QHBoxLayout()
+            reading_status_label = QLabel(f"<b>📑 {review['readingstatus']}</b>", self)
+            reading_status_label.setStyleSheet("font-size: 14px;")
+            fourth_row.addWidget(reading_status_label)
 
-            # Book Author
-            bookauthor_label = QLabel(f"<b>Author:</b> {review['bookauthor']}", self)
-            card_layout.addWidget(bookauthor_label)
+            buyplace_label = QLabel(f"<b>🛒 {review['buyplace']}</b>", self)
+            buyplace_label.setStyleSheet("font-size: 14px;")
+            fourth_row.addStretch()  # Push buyplace to the right
+            fourth_row.addWidget(buyplace_label)
+            content_layout.addLayout(fourth_row)
 
-            # Rating
-            rating_label = QLabel(f"<b>Rating:</b> {review['rating']}/5", self)
-            card_layout.addWidget(rating_label)
-
-            # Reading Status
-            reading_status_label = QLabel(f"<b>Reading Status:</b> {review['readingstatus']}", self)
-            card_layout.addWidget(reading_status_label)
-
-            # Buy Place
-            buyplace_label = QLabel(f"<b>Buy Place:</b> {review['buyplace']}", self)
-            card_layout.addWidget(buyplace_label)
-
-            # Satisfaction
-            satisfied_label = QLabel(f"<b>Satisfied:</b> {'Yes' if review['satisfied'] else 'No'}", self)
-            card_layout.addWidget(satisfied_label)
-
-            # Experience
-            experience_label = QLabel(f"<b>Experience:</b> {review['experience']}", self)
-            card_layout.addWidget(experience_label)
+            # Add content layout to the card layout
+            card_layout.addLayout(content_layout)
 
             # Add card to the scroll layout
             self.scroll_layout.addWidget(card)
@@ -345,22 +522,55 @@ class MainBoardPage(QWidget):
         # Add stretch to push cards to the top
         self.scroll_layout.addStretch()
 
-    def load_photo(self, photo_url, photo_label):
-        """
-        Loads the book photo from the URL and sets it in the QLabel.
-        """
-        network_manager = QNetworkAccessManager(self)
-        request = QNetworkRequest(QUrl(photo_url))
-        reply = network_manager.get(request)
-        reply.finished.connect(lambda: self.set_photo(reply, photo_label))
+     ##############   Book IMage displayed .
 
-    def set_photo(self, reply, photo_label):
-        """
-        Sets the photo in the QLabel after loading it from the network reply.
-        """
-        if reply.error() == QNetworkReply.NoError:
-            data = reply.readAll()
-            pixmap = QPixmap()
-            pixmap.loadFromData(data)
-            photo_label.setPixmap(pixmap.scaled(100, 150, Qt.KeepAspectRatio))
-        reply.deleteLater() 
+
+
+
+
+    # def load_photo(self, photo_url, photo_label):
+    #     """
+    #     Loads the book photo from the URL and sets it in the QLabel.
+    #     Displays a placeholder text until the image is loaded.
+    #     """
+    #     # Set placeholder text while the image is loading
+    #     photo_label.setText("Book Cover Photo")
+    #     photo_label.setAlignment(Qt.AlignCenter)  # Center the placeholder text
+    #     photo_label.setStyleSheet("""
+    #     QLabel {
+    #         background-color: #ccc;
+    #         border: 2px solid #999;  /* Border for the image */
+    #         border-radius: 5px;
+    #         font-size: 14px;
+    #         color: #333;
+    #     }
+    #     """)
+
+    #     # Use QNetworkAccessManager to load the image
+    #     network_manager = QNetworkAccessManager(self)
+    #     request = QNetworkRequest(QUrl(photo_url))
+    #     reply = network_manager.get(request)
+    #     reply.finished.connect(lambda: self.set_photo(reply, photo_label))
+
+
+    # def set_photo(self, reply, photo_label):
+    #     """
+    #     Sets the photo in the QLabel after loading it from the network reply.
+    #     Removes the placeholder text once the image is loaded.
+    #     """
+    #     if reply.error() == QNetworkReply.NoError:
+    #       data = reply.readAll()
+    #       pixmap = QPixmap()
+    #       pixmap.loadFromData(data)
+    #       photo_label.setPixmap(pixmap.scaled(100, 150, Qt.KeepAspectRatio))
+    #       photo_label.setStyleSheet("""
+    #         QLabel {
+    #             background-color: #ccc;
+    #             border: 2px solid #999;  /* Border for the image */
+    #             border-radius: 5px;
+    #         }
+    #         """)
+    #     else:
+    #        # If there's an error loading the image, keep the placeholder text
+    #        photo_label.setText("Failed to Load Image")
+    #     reply.deleteLater()
