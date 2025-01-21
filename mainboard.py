@@ -1,19 +1,366 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
-import utils
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QHBoxLayout, QFrame, QLineEdit, QPushButton, QMessageBox, QScrollArea, QComboBox, QCheckBox
+)
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+import requests
+
 
 class MainBoardPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Main Board")
-        self.setGeometry(200, 200, 400, 200)
+        self.setGeometry(800, 700, 5050, 1200)
 
-        layout = QVBoxLayout()
+        # Create main layout
+        self.layout = QHBoxLayout()  # Use QHBoxLayout for left and right sections
 
-        # Access global user details from utils
-        self.username_label = QLabel(f"Username: {utils.username}", self)
-        layout.addWidget(self.username_label)
+        # Left side layout for filters
+        left_layout = QVBoxLayout()
 
-        self.user_id_label = QLabel(f"User ID: {utils.user_id}", self)
-        layout.addWidget(self.user_id_label)
+        # Add filter options to the left side
+        filter_label = QLabel("Filters", self)
+        filter_label.setStyleSheet("font-size: 20px; font-weight: bold; margin-top: 100px;")
+        left_layout.addWidget(filter_label)
 
-        self.setLayout(layout)
+        # Add Reading Status dropdown
+        self.reading_status_dropdown = QComboBox(self)
+        self.reading_status_dropdown.addItems(["All", "start", "continue", "finished"])
+        self.reading_status_dropdown.setPlaceholderText("Reading Status")
+        left_layout.addWidget(self.reading_status_dropdown)
+
+        # Add Rating dropdown
+        self.rating_dropdown = QComboBox(self)
+        self.rating_dropdown.addItems(["All", "1", "2", "3", "4", "5"])
+        self.rating_dropdown.setPlaceholderText("Rating")
+        left_layout.addWidget(self.rating_dropdown)
+
+        # Add Buy Place dropdown
+        self.buyplace_dropdown = QComboBox(self)
+        self.buyplace_dropdown.addItems(["All", "online", "offline"])
+        self.buyplace_dropdown.setPlaceholderText("Buy Place")
+        left_layout.addWidget(self.buyplace_dropdown)
+
+        # Add Satisfaction checkbox
+        self.satisfied_checkbox = QCheckBox("Satisfied", self)
+        left_layout.addWidget(self.satisfied_checkbox)
+
+        # Add Apply button
+        self.apply_button = QPushButton("Apply", self)
+        self.apply_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50; /* Light green */
+                color: white; 
+                padding: 10px 20px; 
+                border: none; 
+                border-radius: 15px; /* Rounded corners */
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #45a049; /* Slightly darker green */
+                font-weight: bold; /* Bold white text */
+            }
+            QPushButton:pressed {
+                background-color: #3e8e41; /* Even darker green */
+                font-weight: bold; /* Bold white text */
+            }
+        """)
+        self.apply_button.clicked.connect(self.handle_apply)
+        left_layout.addWidget(self.apply_button)
+
+        # Add stretch to push filters to the top
+        left_layout.addStretch()
+
+        # Add left layout to the main layout
+        self.layout.addLayout(left_layout)
+
+        # Right side layout for search bar, search button, and cards
+        right_layout = QVBoxLayout()
+
+        # Create a horizontal layout for the navbar
+        navbar = QHBoxLayout()
+
+        # Add "ReviewVerse 📚" at the left side with enhanced styling
+        self.navbar_title = QLabel("ReviewVerse 📚", self)
+        self.navbar_title.setAlignment(Qt.AlignLeft)
+        self.navbar_title.setStyleSheet("""
+            QLabel {
+                font-family: 'Arial', sans-serif;
+                font-size: 30px;  /* Larger font size */
+                font-weight: 700;  /* Bold font */
+            }
+            QLabel:hover {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #45a049,  /* Darker green on hover */
+                    stop:1 #4CAF50
+                );
+                border: 2px solid #3e8e41;  /* Darker border on hover */
+            }
+        """)
+        navbar.addWidget(self.navbar_title)
+
+        # Add a stretch to push the circle to the right
+        navbar.addStretch()
+
+        # Add a circle with black color on the right side
+        circle = QFrame(self)
+        circle.setFixedSize(20, 20)  # Fixed size for the circle
+        circle.setStyleSheet("background-color: black; border-radius: 10px;")  # Circle styling
+        navbar.addWidget(circle)
+
+        # Add navbar to the right layout
+        right_layout.addLayout(navbar)
+
+        # Create a horizontal layout for the search bar and button
+        search_layout = QHBoxLayout()
+
+        # Add search bar
+        self.search_input = QLineEdit(self)
+        self.search_input.setPlaceholderText("Search by book name, author")  # Placeholder text
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                padding: 10px; 
+                border: 2px solid #45a020; 
+                border-radius: 15px;  /* Rounded corners */
+                font-size: 14px;
+            }
+            QLineEdit:hover {
+                border-color: #4CAF50;  /* Hover effect */
+            }
+        """)
+        search_layout.addWidget(self.search_input)
+
+        # Add search button
+        self.search_button = QPushButton("Search", self)
+        self.search_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50; /* Light green */
+                color: white; 
+                padding: 13px 20px; 
+                border: none; 
+                border-radius: 15px; /* Rounded corners */
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #45a049; /* Slightly darker green */
+                font-weight: bold; /* Bold white text */
+            }
+            QPushButton:pressed {
+                background-color: #3e8e41; /* Even darker green */
+                font-weight: bold; /* Bold white text */
+            }
+        """)
+        self.search_button.clicked.connect(self.handle_search)
+        search_layout.addWidget(self.search_button)
+
+        # Add search layout to the right layout
+        right_layout.addLayout(search_layout)
+
+        # Create a scroll area to display the cards
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_content = QWidget()
+        self.scroll_layout = QVBoxLayout(self.scroll_content)
+        self.scroll_area.setWidget(self.scroll_content)
+
+        # Add scroll area to the right layout
+        right_layout.addWidget(self.scroll_area)
+
+        # Add right layout to the main layout
+        self.layout.addLayout(right_layout)
+
+        # Set the layout for the page
+        self.setLayout(self.layout)
+
+    def handle_search(self):
+        """
+        Handles the search button click event.
+        """
+        search_text = self.search_input.text().strip()
+
+        # Validation: Check if the search input is empty
+        if not search_text:
+            QMessageBox.warning(self, "Input Error", "Please enter a book name or author to search.")
+            return
+
+        # Call the API
+        self.call_api(search_text)
+
+    def handle_apply(self):
+        """
+        Handles the Apply button click event for filters.
+        """
+        # Get filter values
+        reading_status = self.reading_status_dropdown.currentText()
+        rating = self.rating_dropdown.currentText()
+        buyplace = self.buyplace_dropdown.currentText()
+        satisfied = self.satisfied_checkbox.isChecked()
+
+        # Prepare API parameters
+        params = {
+            "page": 1,
+            "page_size": 10
+        }
+
+        # Add filters to parameters if not "All"
+        if reading_status != "All":
+            params["readingstatus"] = reading_status
+        if rating != "All":
+            params["rating"] = float(rating)
+        if buyplace != "All":
+            params["buyplace"] = buyplace
+        if satisfied:
+            params["satisfied"] = True
+
+        # Call the API with filters
+        self.call_api_with_filters(params)
+
+    def call_api(self, search_text):
+        """
+        Calls the API with the search text and displays the results.
+        """
+        url = "https://reviewverse.onrender.com/filter"
+        params = {
+            "page": 1,
+            "page_size": 10
+        }
+
+        # Add bookname or bookauthor based on input
+        if " " in search_text:  # If input contains spaces, assume it's a book name
+            params["bookname"] = search_text
+        else:  # Otherwise, assume it's an author name
+            params["bookauthor"] = search_text
+
+        headers = {
+            "accept": "application/json"
+        }
+
+        try:
+            response = requests.get(url, params=params, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                self.display_reviews(data)
+            else:
+                QMessageBox.warning(self, "API Error", f"Failed to fetch data. Status code: {response.status_code}")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"An error occurred: {str(e)}")
+
+    def call_api_with_filters(self, params):
+        """
+        Calls the API with the selected filters and displays the results.
+        """
+        url = "https://reviewverse.onrender.com/filter"
+        headers = {
+            "accept": "application/json"
+        }
+
+        try:
+            response = requests.get(url, params=params, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                self.display_reviews(data)
+            else:
+                QMessageBox.warning(self, "API Error", f"Failed to fetch data. Status code: {response.status_code}")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"An error occurred: {str(e)}")
+
+    def display_reviews(self, data):
+        """
+        Displays the reviews in a card format matching the design in the image.
+        """
+        # Clear previous results
+        for i in reversed(range(self.scroll_layout.count())):
+            self.scroll_layout.itemAt(i).widget().setParent(None)
+
+        # Check if there are reviews
+        if not data.get("reviews"):
+            QMessageBox.information(self, "No Results", "No reviews found for the given filters.")
+            return
+
+        # Display each review in a card
+        for review in data["reviews"]:
+            card = QFrame(self)
+            card.setStyleSheet("""
+                QFrame {
+                    background-color: #f9f9f9;
+                    border: 1px solid #ddd;
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin: 10px;
+                }
+                QLabel {
+                    font-size: 14px;
+                    color: #333;
+                }
+            """)
+            card_layout = QVBoxLayout(card)
+
+            # Book Photo (Load from URL)
+            photo_label = QLabel(self)
+            photo_label.setFixedSize(100, 150)  # Set a fixed size for the photo
+            photo_label.setStyleSheet("""
+                QLabel {
+                    background-color: #ccc;
+                    border: 1px solid #999;
+                    border-radius: 5px;
+                }
+            """)
+            if review.get("bookphoto"):  # Load the book photo if URL is available
+                self.load_photo(review["bookphoto"], photo_label)
+            card_layout.addWidget(photo_label)
+
+            # Book Name
+            bookname_label = QLabel(f"<b>Book Name:</b> {review['bookname']}", self)
+            card_layout.addWidget(bookname_label)
+
+            # Book Author
+            bookauthor_label = QLabel(f"<b>Author:</b> {review['bookauthor']}", self)
+            card_layout.addWidget(bookauthor_label)
+
+            # Rating
+            rating_label = QLabel(f"<b>Rating:</b> {review['rating']}/5", self)
+            card_layout.addWidget(rating_label)
+
+            # Reading Status
+            reading_status_label = QLabel(f"<b>Reading Status:</b> {review['readingstatus']}", self)
+            card_layout.addWidget(reading_status_label)
+
+            # Buy Place
+            buyplace_label = QLabel(f"<b>Buy Place:</b> {review['buyplace']}", self)
+            card_layout.addWidget(buyplace_label)
+
+            # Satisfaction
+            satisfied_label = QLabel(f"<b>Satisfied:</b> {'Yes' if review['satisfied'] else 'No'}", self)
+            card_layout.addWidget(satisfied_label)
+
+            # Experience
+            experience_label = QLabel(f"<b>Experience:</b> {review['experience']}", self)
+            card_layout.addWidget(experience_label)
+
+            # Add card to the scroll layout
+            self.scroll_layout.addWidget(card)
+
+        # Add stretch to push cards to the top
+        self.scroll_layout.addStretch()
+
+    def load_photo(self, photo_url, photo_label):
+        """
+        Loads the book photo from the URL and sets it in the QLabel.
+        """
+        network_manager = QNetworkAccessManager(self)
+        request = QNetworkRequest(QUrl(photo_url))
+        reply = network_manager.get(request)
+        reply.finished.connect(lambda: self.set_photo(reply, photo_label))
+
+    def set_photo(self, reply, photo_label):
+        """
+        Sets the photo in the QLabel after loading it from the network reply.
+        """
+        if reply.error() == QNetworkReply.NoError:
+            data = reply.readAll()
+            pixmap = QPixmap()
+            pixmap.loadFromData(data)
+            photo_label.setPixmap(pixmap.scaled(100, 150, Qt.KeepAspectRatio))
+        reply.deleteLater() 
