@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton, QComboBox, QTextEdit, QCheckBox, QMessageBox, QFileDialog
 )
 from PyQt5.QtCore import Qt
+from utils import username, user_id
 
 class WriteReview(QWidget):
     def __init__(self):
@@ -11,9 +12,9 @@ class WriteReview(QWidget):
         self.setWindowTitle("Write Review")
         self.setGeometry(500, 500, 1000, 700)
 
-        # Hardcoded username and user_id
-        self.username = "parth"
-        self.user_id = "67839a39115365aa3e74fcd3"
+        # users username and user_id
+        self.username = username
+        self.user_id = user_id
 
         # Layout
         layout = QVBoxLayout()

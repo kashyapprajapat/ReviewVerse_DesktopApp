@@ -7,11 +7,11 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt5.QtCore import QUrl
-
+from utils import username, user_id
 
 # Hardcoded username and user_id
-username = "parth"
-user_id = "67839a39115365aa3e74fcd3"
+username = username
+user_id = user_id
 
 class UserDashboard(QWidget):
     def __init__(self):
