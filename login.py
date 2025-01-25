@@ -9,6 +9,7 @@ import utils  # Ensure you have this module or replace with your desired impleme
 class LoginPage(QWidget):
     switch_to_register = pyqtSignal()
     switch_to_mainboard = pyqtSignal()
+    switch_to_admin_dashboard = pyqtSignal() 
 
     def __init__(self):
         super().__init__()
@@ -142,6 +143,13 @@ class LoginPage(QWidget):
         """
         email = self.email_input.text()
         password = self.password_input.text()
+
+        #Admin login
+        if email == "admin" and password == "Admin@123":
+            QMessageBox.information(self, "Admin Login", "Welcome, Admin!")
+            self.switch_to_admin_dashboard.emit()
+            return
+
 
         if not email or not password:
             QMessageBox.warning(self, "Error", "Please enter both email and password.")
