@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QCursor
 import requests
-from userdashboard import UserDashboard  # Import the UserDashboard class
-from utils import set_user_details  # Import the set_user_details function
+from userdashboard import UserDashboard  
+from utils import set_user_details  
 
 
 class MainBoardPage(QWidget):
@@ -545,14 +545,14 @@ class MainBoardPage(QWidget):
         # Import the global variables from utils
         from utils import username, user_id
 
-        # Check if user details are set 
+        # Check if user details are set
         if username is None or user_id is None:
-          QMessageBox.warning(self, "Error", "User details are not set. Please log in first.")
-        return
+           QMessageBox.warning(self, "Error", "User details are not set. Please log in first.")
+           return  # Exit if user details are not set
 
-        # Open the UserDashboard
-        self.dashboard = UserDashboard()
-        self.dashboard.show()   
+        
+        self.dashboard = UserDashboard(username,user_id)
+        self.dashboard.show() 
         
         
         

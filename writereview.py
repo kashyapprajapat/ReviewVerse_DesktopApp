@@ -4,21 +4,17 @@ from PyQt5.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton, QComboBox, QTextEdit, QCheckBox, QMessageBox, QFileDialog
 )
 from PyQt5.QtCore import Qt
-from utils import username, user_id
 
 class WriteReview(QWidget):
-    def __init__(self):
+    def __init__(self, user_id):
         super().__init__()
+        self.user_id = user_id  # Assign user_id to an instance attribute
         self.setWindowTitle("Write Review")
         self.setGeometry(500, 500, 1000, 700)
 
-        # users username and user_id
-        self.username = username
-        self.user_id = user_id
-
         # Layout
         layout = QVBoxLayout()
-
+        
         # Book Name
         layout.addWidget(QLabel("Book Name:"))
         self.bookname_input = QLineEdit()
@@ -93,7 +89,7 @@ class WriteReview(QWidget):
         buy_place = self.buy_place_input.currentText().lower()
         satisfied = self.satisfied_input.isChecked()
         bookphoto = self.bookphoto_path.text().strip()
-
+        print(f"user id in add review{self.user_id}----==00------")
         if not bookname:
             QMessageBox.warning(self, "Error", "Book Name is required!")
             return
@@ -144,7 +140,7 @@ class WriteReview(QWidget):
             )
             if response.status_code == 200:
                 QMessageBox.information(self, "Success", "BookReview added successfully!")
-                self.close() 
+                self.close()
             else:
                 QMessageBox.warning(self, "Error", f"Failed to add review: {response.text}")
         except Exception as e:

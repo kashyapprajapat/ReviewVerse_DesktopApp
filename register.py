@@ -6,6 +6,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPixmap
 import requests
 import os
+from utils import set_user_details
 
 class RegisterPage(QWidget):
     switch_to_login = pyqtSignal()
@@ -301,6 +302,17 @@ class RegisterPage(QWidget):
         try:
             response = self.send_register_request(username, email, password, gender, age, role, self.profile_photo_path)
             if response.status_code == 200 or response.json().get("message") == "User registered successfully":
+                response_data = response.json()
+                print(f"Response data {response_data}")
+                user_data = response_data.get("user")
+                print(f"user data {user_data}")
+                username = user_data.get("username")
+                user_id = user_data.get("_id") 
+
+                # Print the details
+                print(f"Username is: {username}")
+                print(f"User ID is: {user_id}")
+                set_user_details(username, user_id)
                 QMessageBox.information(self, "Success", "You have successfully registered!")
                 self.switch_to_login.emit()
             else:

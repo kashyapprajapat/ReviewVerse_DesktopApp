@@ -11,3 +11,4 @@ def set_user_details(name, uid):
     global username, user_id
     username = name
     user_id = uid
+    print(f"User details set in the utils: {username}, {user_id}")
