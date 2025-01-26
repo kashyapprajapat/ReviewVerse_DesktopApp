@@ -8,7 +8,7 @@ ReviewVerse is an interactive platform that allows book lovers to come together,
 ## User  Section 
 
 ### Login screen
-![Demo Image 1](./demoimages/login_1.png)
+![Demo Image 1](./DemoImages/login_1.png)
 
 ### Registration screen
 ![Demo Image 1](demoimages/registration_2.png)
