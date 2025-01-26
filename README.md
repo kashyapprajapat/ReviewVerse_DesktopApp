@@ -11,44 +11,44 @@ ReviewVerse is an interactive platform that allows book lovers to come together,
 ![Demo Image 1](./DemoImages/login_1.png)
 
 ### Registration screen
-![Demo Image 1](demoimages/registration_2.png)
+![Demo Image 1](./DemoImages/registration_2.png)
 
 ### Registration Sucess screen
-![Demo Image 1](demoimages/registration_3.png)
+![Demo Image 1](./DemoImages/registration_3.png)
 
 ### Eamil screen
-![Demo Image 1](demoimages/registrationemail_2_1.png)
+![Demo Image 1](./DemoImages/registrationemail_2_1.png)
 
 ### Login sucess screen
-![Demo Image 1](demoimages/login_4.png)
+![Demo Image 1](./DemoImages/login_4.png)
 
 ### User MainBoard
-![Demo Image 1](demoimages/mainpage_5.png)
+![Demo Image 1](./DemoImages/mainpage_5.png)
 
 ### User Dashboard
-![Demo Image 1](demoimages/userdashboard_6.png)
+![Demo Image 1](./DemoImages/userdashboard_6.png)
 
 ### Add Review
-![Demo Image 1](demoimages/addreview_7.png)
+![Demo Image 1](./DemoImages/addreview_7.png)
 
 ### Remove Review
-![Demo Image 1](demoimages/deletereview_8.png)
+![Demo Image 1](./DemoImages/deletereview_8.png)
 
 ##
 
 ## Admin  Section 
 
 ### Admin Login
-![Demo Image 1](demoimages/adminlogin_9.png)
+![Demo Image 1](./DemoImages/adminlogin_9.png)
 
 ### Admin Dashboard
-![Demo Image 1](demoimages/admindash_10.png)
+![Demo Image 1](./DemoImages/admindash_10.png)
 
 ### Admin user section
-![Demo Image 1](demoimages/admin_user11.png)
+![Demo Image 1](./DemoImages/admin_user11.png)
 
 ### Admin System Status
-![Demo Image 1](demoimages/adminhealth12.png)
+![Demo Image 1](./DemoImages/adminhealth12.png)
 
 ##
 
