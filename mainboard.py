@@ -12,7 +12,7 @@ class MainBoardPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Main Board")
-        self.setGeometry(800, 700, 8000, 2000)
+        self.setGeometry(800, 700, 800, 800)  # Adjusted size to be more reasonable
 
         # Pagination variables
         self.current_page = 1
@@ -32,14 +32,6 @@ class MainBoardPage(QWidget):
                 font-family: 'Arial', sans-serif;
                 font-size: 30px;  /* Larger font size */
                 font-weight: 700;  /* Bold font */
-            }
-            QLabel:hover {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #45a049,  /* Darker green on hover */
-                    stop:1 #4CAF50
-                );
-                border: 2px solid #3e8e41;  /* Darker border on hover */
             }
         """)
         navbar.addWidget(self.navbar_title)
@@ -247,6 +239,7 @@ class MainBoardPage(QWidget):
         self.scroll_area.setWidgetResizable(True)
         self.scroll_content = QWidget()
         self.scroll_layout = QVBoxLayout(self.scroll_content)
+        self.scroll_content.setLayout(self.scroll_layout)  # Explicitly set the layout
         self.scroll_area.setWidget(self.scroll_content)
 
         # Add scroll area to the right layout
@@ -450,87 +443,89 @@ class MainBoardPage(QWidget):
         Displays the reviews in a card format.
         """
         # Clear previous results
-        for i in reversed(range(self.scroll_layout.count())):
-            self.scroll_layout.itemAt(i).widget().setParent(None)
+        # FIX: Properly clear the previous items from the layout
+        while self.scroll_layout.count():
+            item = self.scroll_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         # Check if there are reviews
-        if not data.get("reviews"):
-            QMessageBox.information(self, "No Results", "No reviews found for the given filters.")
+        if not data.get("reviews") or len(data.get("reviews", [])) == 0:
+            no_results = QLabel("No reviews found for the given filters.", self.scroll_content)
+            no_results.setStyleSheet("font-size: 16px; font-weight: bold; padding: 20px;")
+            self.scroll_layout.addWidget(no_results)
             return
 
         # Display each review in a card
         for review in data["reviews"]:
             # Create the main card frame
-            card = QFrame(self)
+            card = QFrame(self.scroll_content)
             card.setStyleSheet("""
                 QFrame {
                     background-color: #f9f9f9;
-                    border: 1px solid;
+                    border: 1px solid #ddd;
                     border-radius: 10px;
                     padding: 15px;
-                    margin: 10px;
+                    margin: 10px 5px;
                 }
             """)
-            card_layout = QHBoxLayout(card)  # Use QHBoxLayout for left (photo) and right (content) sections
-
-            # Right side: Content
-            content_layout = QVBoxLayout()
+            card_layout = QVBoxLayout(card)  # Changed to QVBoxLayout for better mobile layout
 
             # First row: Book Name (left) and Rating (right)
             first_row = QHBoxLayout()
-            bookname_label = QLabel(f"<b>📖 {review['bookname']}</b>", self)
+            bookname_label = QLabel(f"<b>📖 {review.get('bookname', 'Unknown Book')}</b>", card)
             bookname_label.setStyleSheet("font-size: 16px;")
             first_row.addWidget(bookname_label)
 
-            rating_label = QLabel(f"<b>⭐ {review['rating']}/5</b>", self)
+            rating_label = QLabel(f"<b>⭐ {review.get('rating', 'N/A')}/5</b>", card)
             rating_label.setStyleSheet("font-size: 16px;")
             first_row.addStretch()  # Push rating to the right
             first_row.addWidget(rating_label)
-            content_layout.addLayout(first_row)
+            card_layout.addLayout(first_row)
 
             # Second row: Author (left) and Satisfied (right)
             second_row = QHBoxLayout()
-            author_label = QLabel(f"<b>✍🏻 {review['bookauthor']}</b>", self)
+            author_label = QLabel(f"<b>✍🏻 {review.get('bookauthor', 'Unknown Author')}</b>", card)
             author_label.setStyleSheet("font-size: 14px;")
             second_row.addWidget(author_label)
 
-            satisfied_label = QLabel(f"<b>👌🏻 {'Satisfied' if review['satisfied'] else 'Not Satisfied'}</b>", self)
+            satisfied = review.get('satisfied', False)
+            satisfied_label = QLabel(f"<b>👌🏻 {'Satisfied' if satisfied else 'Not Satisfied'}</b>", card)
             satisfied_label.setStyleSheet("font-size: 14px;")
             second_row.addStretch()  # Push satisfied to the right
             second_row.addWidget(satisfied_label)
-            content_layout.addLayout(second_row)
+            card_layout.addLayout(second_row)
 
             # Third row: Experience (textarea-like)
-            experience_label = QLabel("<b>Experience:</b>", self)
-            content_layout.addWidget(experience_label)
+            experience_label = QLabel("<b>Experience:</b>", card)
+            card_layout.addWidget(experience_label)
 
-            experience_text = QTextEdit(self)
-            experience_text.setText(review["experience"])
+            experience_text = QTextEdit(card)
+            experience_text.setText(review.get("experience", "No experience shared"))
             experience_text.setReadOnly(True)  # Make it read-only
             experience_text.setFixedHeight(80)  # Set a fixed height for the text area
             experience_text.setStyleSheet("""
                 QTextEdit {
-                    border: 2px solid #999;  /* Border for the experience section */
+                    border: 2px solid #ddd;
                     border-radius: 5px;
                     padding: 5px;
+                    background-color: white;
                 }
             """)
-            content_layout.addWidget(experience_text)
+            card_layout.addWidget(experience_text)
 
             # Fourth row: Reading Status (left) and Buy Place (right)
             fourth_row = QHBoxLayout()
-            reading_status_label = QLabel(f"<b>📑 {review['readingstatus']}</b>", self)
+            reading_status_label = QLabel(f"<b>📑 {review.get('readingstatus', 'Unknown Status')}</b>", card)
             reading_status_label.setStyleSheet("font-size: 14px;")
             fourth_row.addWidget(reading_status_label)
 
-            buyplace_label = QLabel(f"<b>🛒 {review['buyplace']}</b>", self)
+            buyplace_label = QLabel(f"<b>🛒 {review.get('buyplace', 'Unknown')}</b>", card)
             buyplace_label.setStyleSheet("font-size: 14px;")
             fourth_row.addStretch()  # Push buyplace to the right
             fourth_row.addWidget(buyplace_label)
-            content_layout.addLayout(fourth_row)
-
-            # Add content layout to the card layout
-            card_layout.addLayout(content_layout)
+            card_layout.addLayout(fourth_row)
 
             # Add card to the scroll layout
             self.scroll_layout.addWidget(card)
@@ -547,14 +542,11 @@ class MainBoardPage(QWidget):
 
         # Check if user details are set
         if username is None or user_id is None:
-           QMessageBox.warning(self, "Error", "User details are not set. Please log in first.")
-           return  # Exit if user details are not set
+            QMessageBox.warning(self, "Error", "User details are not set. Please log in first.")
+            return  # Exit if user details are not set
 
-        
-        self.dashboard = UserDashboard(username,user_id)
-        self.dashboard.show() 
-        
-        
+        self.dashboard = UserDashboard(username, user_id)
+        self.dashboard.show()        
         
         
         
